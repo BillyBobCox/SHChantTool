@@ -1,0 +1,14 @@
+{
+  "name": "shchanttool",
+  "version": "1.0.0",
+  "description": "A tool created for Sacred Heart Catholic Church, in Klamath Falls, to automate the creation of psalm based chant with different tones varying in Solemn and Simple.",
+  "main": "index.js",
+  "scripts": {
+    "start":  "node index.js"
+  },
+  "author": "Christian Cox",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
