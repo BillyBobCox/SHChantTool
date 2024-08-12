@@ -1,35 +1,46 @@
 const fs = require('fs');
 const path = require('path');
 
-// Psalm tone definitions for different modes
+// Psalm tone definitions with more complex, variable-length components
 const psalmTones = {
     I: {
-        intonation: '(c4) ',
+        intonation: '(c4) (f) (g) (h) ',
         recitingTone: 'f',
-        mediation: 'g',
-        termination: 'g',
-        finalNote: 'g'
+        mediation: {
+            firstPart: '(g) (f)',
+            secondPart: '(e) (d)',
+        },
+        termination: {
+            firstPart: '(g) (f)',
+            secondPart: '(e) (d)',
+            finalNote: '(c)',
+        },
     },
     II: {
-        intonation: '(c3) ',
+        intonation: '(c3) (g) (f) ',
         recitingTone: 'g',
-        mediation: 'f',
-        termination: 'g',
-        finalNote: 'g'
+        mediation: {
+            firstPart: '(f) (g)',
+            secondPart: '(f) (e)',
+        },
+        termination: {
+            firstPart: '(g) (f)',
+            secondPart: '(e) (d)',
+            finalNote: '(c)',
+        },
     },
-    // Add more modes here
+    // Additional modes with complex structures can be added here
 };
 
 // Function to split the text into two parts based on natural pauses
 function splitText(verse) {
-    // Try splitting by semicolon first, then comma, then space
     let parts = verse.split(';');
     if (parts.length === 1) parts = verse.split(',');
-    if (parts.length === 1) parts = verse.split(/\s(?=\S*$)/); // Split on the last space
+    if (parts.length === 1) parts = verse.split(/\s(?=\S*$)/);
     return parts.map(part => part.trim());
 }
 
-// Function to apply the selected psalm tone to a verse
+// Function to apply a more complex psalm tone structure to a verse
 function applyPsalmTone(text, mode) {
     const verses = text.split('\n').filter(line => line.trim() !== '');
     const tone = psalmTones[mode];
@@ -39,7 +50,7 @@ function applyPsalmTone(text, mode) {
         const [firstPart, secondPart] = splitText(verse);
 
         if (firstPart && secondPart) {
-            // Apply intonation to the first part (only for the first verse)
+            // Apply intonation (only for the first verse)
             if (index === 0) {
                 gabcOutput += `${tone.intonation}${firstPart.split(' ').slice(0, 2).join(`(${tone.recitingTone}) `)}(${tone.recitingTone}) `;
             }
@@ -48,16 +59,16 @@ function applyPsalmTone(text, mode) {
             const remainingFirstPart = firstPart.split(' ').slice(index === 0 ? 2 : 0).join(' ');
             gabcOutput += `${remainingFirstPart.split(' ').join(`(${tone.recitingTone}) `)}(${tone.recitingTone}) `;
 
-            // Apply mediation
-            const lastWordFirstPart = remainingFirstPart.split(' ').pop();
-            gabcOutput += `${lastWordFirstPart}(${tone.mediation}) `;
+            // Apply mediation with first and second part
+            const firstMediationWord = remainingFirstPart.split(' ').pop();
+            gabcOutput += `${tone.mediation.firstPart} ${firstMediationWord}${tone.mediation.secondPart} `;
 
             // Apply reciting tone to the second part
             gabcOutput += `${secondPart.split(' ').join(`(${tone.recitingTone}) `)}(${tone.recitingTone}) `;
 
-            // Apply termination
+            // Apply termination with first and second part
             const lastWordSecondPart = secondPart.split(' ').pop();
-            gabcOutput += `${lastWordSecondPart}(${tone.termination})\n`;
+            gabcOutput += `${tone.termination.firstPart} ${lastWordSecondPart}${tone.termination.secondPart}(${tone.termination.finalNote})\n`;
         }
     });
 
